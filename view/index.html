@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página Principal</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <header>
+        <h1>#</h1>
+        <nav>
+            <ul>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">Sobre</a></li>
+                <li><a href="#services">Serviços</a></li>
+                <li><a onclick="validar()">Validar Token</a></li>
+                <li><a style="cursor: pointer;" onclick="sair()">Sair</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section id="home">
+            <h2>Home</h2>
+            <p>Esta é a seção de introdução da página.</p>
+        </section>
+        <section id="about">
+            <h2>Sobre</h2>
+            <p>Informações sobre a página ou o autor.</p>
+        </section>
+       Serviços</h2>
+            <p>Detalhes sobre os serviços oferecidos.</p>
+        </section>
+        <section id="contact">
+            <h2>Contato</h2>
+            <p>Informações de contato.</p>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2025 Minha Página. Todos os direitos reservados.</p>
+    </footer>
+    <button onclick="window.location = 'login.html'">voltar</button>
+    
+    <script>
+       
+        
+        
+        function sair(){
+            if(confirm("Realmente deseja sair?")){
+                removerAcesso();
+            }
+        }
+        
+        function removerAcesso(){
+            var mydate = new Date();
+
+            window.location = "login.html";
+            mydate.setTime(mydate.getTime() - 1);
+            document.cookie = "token=; expires=" + mydate.toGMTString(); 
+        }
+
+        function validar(){
+            var token = document.cookie.split("=")[1]
+            let url = "http://127.0.0.1:8000/"
+            fetch(url + "login/validarToken", {
+                method: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token                    
+                }
+            })
+            .then(res=>{
+                if(res.status != 200){
+                    removerAcesso();
+                    return;
+                }
+                res.json()
+                .then(r=>{
+                    console.log(r)
+                })
+            })
+        }
+    </script>
+</body>
+</html>
