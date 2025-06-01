@@ -6,6 +6,7 @@ from model.usuario import *
 from services.token import *
 from services.login import *
 from services.email import *
+from routers.usuario import retorna_usuario
 from fastapi.security import HTTPAuthorizationCredentials
 from typing import Annotated
 
@@ -18,8 +19,8 @@ router = APIRouter(
 )
 
 @router.get("/validarToken")
-def validar_token(token: Annotated[HTTPAuthorizationCredentials, Depends(securit)]):
-    return valida_token(token.credentials)
+def validar_token(credentials: Annotated[HTTPAuthorizationCredentials, Depends(securit)]):
+    return valida_token(credentials.credentials)
 
 #adm
 @router.post("/criar", dependencies=[Depends(securit)])
@@ -43,16 +44,19 @@ def entrar(log:EntrarLogin, session: SessionDep):
     login = session.exec(select(Login).where(Login.email == log.email)).first()
     if not login:
         raise HTTPException(404, detail="Login inválido")
-    
-    print(log.senha)
+        
     validar_senha(log.senha, login.senha)
     usuario = session.exec(select(Usuario).where(Usuario.id_login == login.id)).first()
+
     if not usuario:
-        token = cria_token(params={"id_login":login.id})
+        token = cria_token(params={"id_login":login.id, "tp_login":login.tipo})
     else:
-        token = cria_token(usuario.id)
+        token = cria_token(usuario.id, params={"tp_login":login.tipo})
 
     return {"token": token}
+    
+
+
 
 '''
 envia o token para o frontend realizar a validação, posteriormente irei tratar isso no backend com redis
@@ -104,3 +108,10 @@ def mudar_senha(senha: MudarSenha, session: SessionDep, token: Annotated[HTTPAut
     session.refresh(login)
     return login
 
+@router.get("/getLogin/{id_login}")
+def obter_dados_login(id_login, session:SessionDep):
+    login = session.exec(select(Login).where(Login.id == id_login)).first()
+    if not login:
+        raise HTTPException(404, detail="o login não foi encontrado")
+    
+    return login

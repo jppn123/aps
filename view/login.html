@@ -21,11 +21,18 @@
             <div id="erroSenha"></div>
 
             <a href="./recovery.html">Esqueci minha senha</a>
-            <input type="button" onclick="teste()" value="Acessar" class="btn" />
+            <input type="button" onclick="teste()"  value="Acessar" class="btn" />
         </form>
     </div>
 </body>
 <script>
+    var form = document.getElementById("formLogin")
+    form.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            teste()
+        }
+    });
     function teste(){
         let url = "http://127.0.0.1:8000/"
         var formulario = document.getElementById("formLogin")

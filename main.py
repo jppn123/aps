@@ -20,4 +20,5 @@ app.add_middleware(
 app.include_router(horas.router)
 app.include_router(usuario.router)
 app.include_router(login.router)
+app.include_router(utils.router)
 
