@@ -81,7 +81,7 @@ def retorna_desconto(lista_desconto: list):
         if x:
             acao = x[0]
             tempo = x[1:]
-           
+            
             if acao == "+":
                 if i == 0:
                     total_desconto = somar_horas(total_desconto, tempo, acao, acao)

@@ -8,3 +8,7 @@ python -m venv venv
 ```py
 pip install --trusted-host files.pythonhosted.org --trusted-host pypi.org --trusted-host pypi.python.org -r .\requirements.txt
 ```
+
+# gerar senha do email
+
+https://myaccount.google.com/u/3/apppasswords

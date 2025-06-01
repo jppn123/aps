@@ -27,6 +27,8 @@ conf = ConnectionConfig(
 )
 
 async def send_email_async(subject: str, email_to: str, name: str):
+    print("username:"+Envs.MAIL_USERNAME)
+    print("senha:"+Envs.MAIL_PASSWORD)
     codigoAutenticacao = randint(100000, 999999)
     
     with open("./templates/email.html", 'r') as f:
