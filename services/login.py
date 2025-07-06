@@ -23,8 +23,6 @@ def valida_insere_senha(senha, conf_senha):
 def valida_insere_email(email, session:SessionDep):
     MIN_LOGIN = 2
     MAX_LOGIN = 15
-    TAMANHO_INVALIDO_EMAIL_MIN = F"Mínimo de {MIN_LOGIN} caracteres antes do @"
-    TAMANHO_INVALIDO_EMAIL_MAX = F"Máximo de {MAX_LOGIN} caracteres depois do @ e antes do ."
     EMAIL_INVALIDO = "Email inválido"
     EMAIL_CADASTRADO = "Email já cadastrado"
     if not "@" in email:
@@ -32,15 +30,15 @@ def valida_insere_email(email, session:SessionDep):
     
     emailSplitted = email.split("@")
     if len(emailSplitted[0]) < MIN_LOGIN:
-        raise HTTPException(400, detail=TAMANHO_INVALIDO_EMAIL_MIN)
+        raise HTTPException(400, detail=EMAIL_INVALIDO)
     elif len(emailSplitted[0]) > MAX_LOGIN:
-        raise HTTPException(400, detail=TAMANHO_INVALIDO_EMAIL_MAX)
+        raise HTTPException(400, detail=EMAIL_INVALIDO)
     
     emailSplitted = emailSplitted[1].split(".")
     if len(emailSplitted) < 1:
         raise HTTPException(400, detail=EMAIL_INVALIDO)
     if len(emailSplitted[0]) < MIN_LOGIN:
-        raise HTTPException(400, detail=TAMANHO_INVALIDO_EMAIL_MIN)
+        raise HTTPException(400, detail=EMAIL_INVALIDO)
 
     login = session.exec(select(Login).where(Login.email == email)).first()
     if login:
