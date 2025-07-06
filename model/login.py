@@ -12,12 +12,13 @@ class CreateLogin(SQLModel):
     tipo: str | None = Field(default=None)
     email: str | None = Field(default=None)
     senha: str | None = Field(default=None)
-    conf_senha: str | None = Field(default=None)
     
 class EntrarLogin(SQLModel):
     email: str | None = Field(default=None)
     senha: str | None = Field(default=None)
 
+class IdUsuario(SQLModel):
+    id: int | None = Field(default=None)
 
 class RecuperarSenha(SQLModel):
     email: str | None = Field(default=None)

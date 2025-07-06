@@ -7,7 +7,6 @@ class Usuario(SQLModel, table=True):
     nome: str | None = Field(default=None)
     cpf: str | None = Field(default=None)
     data_nascimento: str | None = Field(default=None)
-    rg: str | None = Field(default=None)
     qtd_hrs: int | None = Field(default=None)
     id_login: int | None = Field(default=None, foreign_key="login.id")
    
@@ -18,7 +17,6 @@ class CreateUsuario(SQLModel):
     nome: str | None = Field(default=None)
     cpf: str | None = Field(default=None)
     data_nascimento: str | None = Field(default=None)
-    rg: str | None = Field(default=None)
     qtd_hrs: int | None = Field(default=None)
     id_login: int | None = Field(default=None, foreign_key="login.id")
 
@@ -26,5 +24,4 @@ class UpdateUsuario(SQLModel):
     nome: str | None = Field(default=None)
     cpf: str | None = Field(default=None)
     data_nascimento: str | None = Field(default=None)
-    rg: str | None = Field(default=None)
     qtd_hrs: int | None = Field(default=None)
