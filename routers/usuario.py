@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from sqlmodel import select
 from connection import SessionDep
 from model.usuario import *
+from services.usuario import *
 
 router = APIRouter(
     prefix="/usuario",
@@ -12,10 +13,8 @@ router = APIRouter(
 @router.post("/criar")
 def criar_usuario(usu: CreateUsuario, session: SessionDep):
 
-    usua = session.exec(select(Usuario).where(Usuario.cpf == usu.cpf)).first()
-    if usua:
-        raise HTTPException(400, "CPF já cadastrado")
-    
+    valida_insere_usuario(usu, session)
+
     usuario = Usuario.model_validate(usu)
 
     session.add(usuario)

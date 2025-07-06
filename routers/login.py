@@ -20,14 +20,15 @@ router = APIRouter(
 
 @router.get("/validarToken")
 def validar_token(credentials: Annotated[HTTPAuthorizationCredentials, Depends(securit)]):
+    
     return valida_token(credentials.credentials)
 
 #adm
 @router.post("/criar", dependencies=[Depends(securit)])
 def criar_login(log: CreateLogin, session: SessionDep):
-    login = Login.model_validate(log)
     valida_insere_email(log.email, session)
-    valida_insere_senha(log.senha, log.conf_senha)
+    
+    login = Login.model_validate(log)
     login.senha = criptografa(log.senha)
 
     session.add(login)
@@ -55,8 +56,12 @@ def entrar(log:EntrarLogin, session: SessionDep):
 
     return {"token": token}
     
-
-
+@router.post("/atualizarToken")
+def atualizar(usu:IdUsuario, session:SessionDep):
+    print(usu.id)
+    usuario = session.exec(select(Usuario).where(Usuario.id == usu.id)).first()
+    login = session.exec(select(Login).where(Login.id == usuario.id_login)).first()
+    return {"token":cria_token(usu.id, params={"tp_login":login.tipo})}
 
 '''
 envia o token para o frontend realizar a validação, posteriormente irei tratar isso no backend com redis
