@@ -2,107 +2,83 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Página Principal</title>
-    <link rel="stylesheet" href="index.css">
+    <title>Login</title>
     <link rel="stylesheet" href="login.css">
-    <script src="common.js"></script>
 </head>
 <body>
-    <header>
-        <h1>#</h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="#about">Sobre</a></li>
-                <li><a href="meusDados.html">Meus dados</a></li>
-                <li><a onclick="validar()" style="cursor: pointer;">Validar Token</a></li>
-                <li><a style="cursor: pointer;" onclick="sair()">Sair</a></li>
-            </ul>
-        </nav>
-    </header>
-    <main>
-        <form id="formLogin" autocomplete="off" class="formLogin" style="display: none;">
-            <h1>Atualizar Cadastro</h1>
-            <p>Modifique seus dados cadastrais:</p>
+    <div class="page">
+        <form id="formLogin" autocomplete="off" class="formLogin">
+            <h1>Login</h1>
+            <p>Digite os seus dados de acesso no campo abaixo.</p>
             <label for="email">E-mail</label>
             <input type="email" name="email" placeholder="Digite seu e-mail" autofocus="true" />
             <div id="erroEmail"></div> 
-            <input type="button" onclick=""  value="Confirmar" class="btn" />
+            
+            <label for="password" id="labelPassword">Senha</label>
+            <input type="password" name="password" placeholder="Digite sua senha" />
+            <div id="erroSenha"></div>
+
+            <a href="./recovery.html">Esqueci minha senha</a>
+            <input type="button" onclick="teste()"  value="Acessar" class="btn" />
         </form>
-
-        <!--<section id="about">
-            <h2>Sobre</h2>
-            <p>Informações sobre a página ou o autor.</p>
-        </section>
-            <h2>Serviços</h2>
-            <p>Detalhes sobre os serviços oferecidos.</p>
-        </section>
-        <section id="contact">
-            <h2>Contato</h2>
-            <p>Informações de contato.</p>
-        </section> -->
-    </main>
-    <footer>
-        <p>&copy; 2025 Minha Página. Todos os direitos reservados.</p>
-    </footer>
-    <button onclick="window.location = 'login.html'">voltar</button>
-    
-    <script>
-        validar()
-        //function
-        var tipoLogin = "";
-        function sair(){
-            if(confirm("Realmente deseja sair?")){
-                removerAcesso();
-            }
-        }
-        
-        function removerAcesso(){
-            var mydate = new Date();
-
-            window.location = "login.html";
-            mydate.setTime(mydate.getTime() - 1);
-            document.cookie = "token=; expires=" + mydate.toGMTString(); 
-        }
-
-        function validar(){
-            fetch(url + "login/validarToken", {
-                method: "GET",
-                headers: {
-                    'Authorization': 'Bearer ' + token                    
-                }
-            })
-            .then(res=>{
-                if(res.status != 200){
-                    removerAcesso();
-                    return;
-                }
-                res.json()
-                .then(r=>{
-                    console.log(r)
-                    if(r.id_login){
-                        console.log("tem id_logn")
-                    }else{
-                        console.log("tem id_usu")
-                        //nao fazer nada demais
-                    }
-                    tipoLogin = r.tp_login
-                    if(tipoLogin == "admin"){
-                        const li = document.createElement("li");
-                        const a = document.createElement("a");
-                        const ul = document.querySelector("ul");
-
-                        a.id = "login";
-                        a.href = "inserirLogin.html";
-                        a.textContent = "Inserir Login";
-
-                        li.appendChild(a);
-                        ul.insertBefore(li, ul.lastElementChild);
-                    }
-                })
-            })
-        }
-    </script>
+    </div>
 </body>
+<script>
+    var form = document.getElementById("formLogin")
+    form.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            teste()
+        }
+    });
+    function teste(){
+        let url = "http://127.0.0.1:8000/"
+        var formulario = document.getElementById("formLogin")
+        
+        fetch(url+'login/entrar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({"email":formulario.email.value, "senha":formulario.password.value}),
+            
+        })
+        .then(response => {
+            document.getElementById("erroEmail").innerText = "";
+            document.getElementById("erroSenha").innerText = "";
+
+            if(!response.ok){
+                trataResponse(response);
+                return;
+            }
+
+            response.json()
+            .then(response=>{
+                document.cookie = `token=${response.token};`
+                window.location = 'mainpage.html'
+            });
+        });
+    }
+
+    function trataResponse(response){
+        response.json()
+        .then(r=>{ 
+            switch(response.status){
+                case 404:
+                    document.getElementById("erroSenha").innerText = "";
+                    document.getElementById("erroEmail").innerText = r.detail;
+                    break;
+                case 400:
+                    document.getElementById("erroEmail").innerText = "";
+                    document.getElementById("erroSenha").innerText = r.detail;
+                    break;
+            }
+        });
+    }
+    
+</script>
+
+
 </html>

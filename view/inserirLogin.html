@@ -4,83 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulário de Cadastro de Login</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0px auto;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        .form-group input {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-        }
-        .form-group button {
-            margin-bottom: 15px;
-            background-color: #4CAF50;
-            color: #fff;
-            border: none;
-            cursor: pointer;
-        }
-        .form-group button:hover {
-            background-color: #45a049;
-        }
-    </style>
     <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="inserirLogin.css">
     <script src="common.js"></script>
 </head>
 <header>
     <h1>#</h1>
     <nav>
         <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="#about">Sobre</a></li>
-            <li><a href="meusDados.html">Meus dados</a></li>
-            <li><a onclick="validarDados()" style="cursor: pointer;">Validar Token</a></li>
+            <li><a href="mainpage.html">Inicio</a></li>
+            <li id="Sobre"><a href="#about">Sobre</a></li>
+            <li id="MeusDados"><a  href="meusDados.html">Meus dados</a></li>
             <li><a style="cursor: pointer;" onclick="sair()">Sair</a></li>
         </ul>
     </nav>
 </header>
 <body>
     <div class="container">
-        <h2>Meus Dados</h2>
-        <form action="">
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email">
-            </div>
-            <div class="form-group">
-                <label for="password">Senha:</label>
-                <input type="password" id="password" name="password" value="12345678">
-            </div>
-            <div class="form-group">
-                <label for="tipo">Tipo de Login:</label>
-                <select id="meuSelector" name="opcao">
-                    <option value="admin">admin</option>
-                    <option value="func">funcionario</option>
-                    <option value="coord">coordenador</option>
-                </select>
-            </div>
-            <div style="padding-bottom: 10px;">
-                <button onclick="CriarLogin()">Inserir Login</button>
-            </div>
-        </form>
-        <button onclick="window.location = 'index.html'">voltar</button>
+        <h2>Dados de Login</h2>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email">
+            <div id="erroEmail"></div>
+        </div>
+        <div class="form-group">
+            <label for="password">Senha:</label>
+            <input type="password" id="password" name="password" value="12345678">
+        </div>
+        <div class="form-group">
+            <label for="tipo">Tipo de Login:</label>
+            <select id="meuSelector" name="opcao">
+                <option value="adm">admin</option>
+                <option value="func">funcionario</option>
+                <option value="coord">coordenador</option>
+            </select>
+        </div>
+        <div style="padding-bottom: 10px;">
+            <button onclick="CriarLogin()">Inserir Login</button>
+        </div>
     </div>
 </body>
 <footer>
@@ -89,54 +50,12 @@
 <script>
     //TODO update usuario quando o cara clicar em criar usuario e já tiver usuario
     validarDados();
-    var idLogin = "";
-    var idUsu = "";
-    var email = "";
-
-    function validarDados(){
-        if(document.cookie != ""){
-            fetch(url + "login/validarToken", {
-                method: "GET",
-                headers: {
-                    'Authorization': 'Bearer ' + token                    
-                }
-            })
-            .then(res=>{
-                if(res.status != 200){
-                    removerAcesso();
-                    return;
-                }
-                res.json()
-                .then(r=>{
-                    
-                    tipoLogin = r.tp_login
-                    if(tipoLogin == "admin"){
-                        const li = document.createElement("li");
-                        const a = document.createElement("a");
-                        const ul = document.querySelector("ul");
-
-                        a.id = "login";
-                        a.href = "inserirLogin.html";
-                        a.textContent = "Inserir Login";
-
-                        li.appendChild(a);
-                        ul.insertBefore(li, ul.lastElementChild);
-                    }
-                })
-            })
-        }else{
-            alert("Sessão expirada")
-            window.location = pgLogin;
-            return 
-        }
-    }
 
     function CriarLogin(){
         var dados = {
             "tipo":document.getElementById("meuSelector").value,
             "email": document.getElementById("email").value,
-            "senha": document.getElementById("password").value,
-            "conf_senha": document.getElementById("password").value
+            "senha": document.getElementById("password").value
         }
         fetch(url + "login/criar", {
                 method: "POST",
@@ -147,9 +66,19 @@
                 }
             })
             .then(res=>{
+                document.getElementById("erroEmail").innerText = "";
                 if(res.status != 200){
-                    //removerAcesso();
-                    return;
+                    if(res.status == 400){
+                        res.json()
+                        .then(r=>{
+                            document.getElementById("erroEmail").innerText = r.detail;
+                        })
+                        return;
+                    }else{
+                        removerAcesso();
+                        return;
+                    }
+                    
                 }
                 res.json()
                 .then(r=>{
