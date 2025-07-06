@@ -5,3 +5,7 @@ pyodbc
 PyJWT
 cryptocode
 python-dotenv
+insightface
+onnxruntime
+Pillow
+numpy
