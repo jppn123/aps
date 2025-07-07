@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página Principal</title>
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="login.css">
+    <script src="common.js"></script>
+</head>
+<body>
+    <header>
+        <h1>#</h1>
+        <nav>
+            <ul>
+                <li><a href="mainpage.html">Inicio</a></li>
+                <li id="Sobre"><a href="#about">Sobre</a></li>
+                <li id="MeusDados"><a  href="meusDados.html">Meus dados</a></li>
+                <li><a style="cursor: pointer;" onclick="sair()">Sair</a></li>
+            </ul>
+        </nav>
+    </header>
+    <footer>
+        <p>&copy; 2025 Minha Página. Todos os direitos reservados.</p>
+    </footer>
+    <button onclick="window.location = 'index.html'">voltar</button>
+    
+    <script>
+        VerificarToken()
+        function VerificarToken(){
+            fetch(url + "login/validarToken", {
+                method: "GET",
+                headers: {
+                    'Authorization': "Bearer " + token                  
+                }
+            })
+            .then(res=>{
+                if(res.status != 200){
+                    removerAcesso();
+                    return;
+                }
+                res.json()
+                .then(r=>{
+                    if(r.tp_login != "adm" & r.id_login){
+                        window.location = 'meusDados.html'
+                    }
+                    var tipoLogin = r.tp_login
+                    if(tipoLogin == "adm"){
+                        document.getElementById("MeusDados").style.display = "none";
+                        document.getElementById("Sobre").style.display = "none";
+
+                        const li = document.createElement("li");
+                        const a = document.createElement("a");
+                        const ul = document.querySelector("ul");
+
+                        a.id = "login";
+                        a.href = "inserirLogin.html";
+                        a.textContent = "Criar Login";
+
+                        li.appendChild(a);
+                        ul.insertBefore(li, ul.lastElementChild);
+                    } 
+                    
+                })
+                
+            })
+        }
+    </script>
+</body>
+</html>

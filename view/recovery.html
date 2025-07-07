@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+    <div class="page">
+        <form id="formInicio" autocomplete="off" class="formLogin">
+            <h1>Redefinição da senha</h1>
+            <p>Para realizar a redefinição de sua senha, insira o código que será enviado para seu email da empresa no local indicado.</p>
+            <input type="button" onclick="start()" value="Continuar" class="btn" />
+        </form>
+        <form id="formLogin" autocomplete="off" class="formLogin" style="display: none;">
+            <h1>Redefinição da senha</h1>
+            <p>Insira o email para redefinição da senha</p>
+            <label for="email">E-mail</label>
+            <input type="email" name="email" placeholder="Digite seu e-mail" autofocus="true" />
+            <div id="erroEmail"></div> 
+            <input type="button" onclick="teste()" value="Continuar" class="btn" />
+        </form>
+        <form id="formCodigo" autocomplete="off" class="formLogin" style="display: none;">
+            <h1>Redefinição da senha</h1>
+            <p>Insira o código enviado por email</p>
+            <label for="codigo">Código</label>
+            <input type="text" name="codigo" placeholder="Digite o código" autofocus="true" />
+            <div id="erroCodigo"></div> 
+            <input type="button" onclick="validarCodigo()" value="Continuar" class="btn" />
+        </form>
+    </div>
+</body>
+<script>
+    function start(){
+        document.getElementById("formInicio").style.display = 'none'
+        document.getElementById("formLogin").style.display = 'flex'
+    }
+    function teste(){
+        var url = "http://127.0.0.1:8000/"
+        var formulario = document.getElementById("formLogin")
+        var formCodigo = document.getElementById("formCodigo")
+
+        fetch(url + "login/enviarEmail", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({"email":formulario.email.value}),
+        }).then(response=>{
+            document.getElementById("erroEmail").innerText = "" 
+            document.getElementById("erroCodigo").innerText = "" 
+
+            if(!response.ok){
+                response.json()
+                .then(r=>{
+                    document.getElementById("erroEmail").innerText = r.detail 
+                })
+                return
+            }
+
+            formulario.style.display = "none"
+            formCodigo.style.display = "flex"
+            response.json()
+            .then(res=>{
+                document.cookie = `token=${res.token};`
+                // window.location = "resetPassword.html"
+            })
+        })
+    }
+    function validarCodigo(){
+        var token = document.cookie.split("=")[1]
+        var url = "http://127.0.0.1:8000/"
+        var formCodigo = document.getElementById("formCodigo")
+
+        fetch(url + "login/validarCodigo", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer " + token
+            },
+            body: JSON.stringify({"codigo":formCodigo.codigo.value}),
+
+        }).then(response=>{
+            document.getElementById("erroCodigo").innerText = ""
+
+            if(!response.ok){
+                response.json()
+                .then(r=>{
+                    console.log(r.detail)
+                    document.getElementById("erroCodigo").innerText = r.detail 
+                })
+                return
+            }
+            response.json()
+            .then(r=>{
+                window.location = "resetPassword.html"
+            })
+        })
+    }
+</script>
+</html>

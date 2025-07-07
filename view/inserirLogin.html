@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulário de Cadastro de Login</title>
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="inserirLogin.css">
+    <script src="common.js"></script>
+</head>
+<header>
+    <h1>#</h1>
+    <nav>
+        <ul>
+            <li><a href="mainpage.html">Inicio</a></li>
+            <li id="Sobre"><a href="#about">Sobre</a></li>
+            <li id="MeusDados"><a  href="meusDados.html">Meus dados</a></li>
+            <li><a style="cursor: pointer;" onclick="sair()">Sair</a></li>
+        </ul>
+    </nav>
+</header>
+<body>
+    <div class="container">
+        <h2>Dados de Login</h2>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email">
+            <div id="erroEmail"></div>
+        </div>
+        <div class="form-group">
+            <label for="password">Senha:</label>
+            <input type="password" id="password" name="password" value="12345678">
+        </div>
+        <div class="form-group">
+            <label for="tipo">Tipo de Login:</label>
+            <select id="meuSelector" name="opcao">
+                <option value="adm">admin</option>
+                <option value="func">funcionario</option>
+                <option value="coord">coordenador</option>
+            </select>
+        </div>
+        <div style="padding-bottom: 10px;">
+            <button onclick="CriarLogin()">Inserir Login</button>
+        </div>
+    </div>
+</body>
+<footer>
+    <p>&copy; 2025 Minha Página. Todos os direitos reservados.</p>
+</footer>
+<script>
+    //TODO update usuario quando o cara clicar em criar usuario e já tiver usuario
+    validarDados();
+
+    function CriarLogin(){
+        var dados = {
+            "tipo":document.getElementById("meuSelector").value,
+            "email": document.getElementById("email").value,
+            "senha": document.getElementById("password").value
+        }
+        fetch(url + "login/criar", {
+                method: "POST",
+                body:JSON.stringify(dados),
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'                 
+                }
+            })
+            .then(res=>{
+                document.getElementById("erroEmail").innerText = "";
+                if(res.status != 200){
+                    if(res.status == 400){
+                        res.json()
+                        .then(r=>{
+                            document.getElementById("erroEmail").innerText = r.detail;
+                        })
+                        return;
+                    }else{
+                        removerAcesso();
+                        return;
+                    }
+                    
+                }
+                res.json()
+                .then(r=>{
+                    console.log(r)
+                })
+            })
+    }
+        
+
+</script>
+</html>
