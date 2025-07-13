@@ -3,6 +3,7 @@ from sqlmodel import select
 from connection import SessionDep
 from model.usuario import *
 from services.usuario import *
+from model.login import Login
 
 router = APIRouter(
     prefix="/usuario",
@@ -42,3 +43,19 @@ def criar_usuario(id_usuario, usu: UpdateUsuario, session: SessionDep):
     session.commit()
     session.refresh(usuario)
     return usuario
+
+@router.get("/getUsuarioPorEmail/{email}")
+def retorna_usuario_por_email(email: str, session: SessionDep):    
+    
+    # Primeiro busca o login pelo email
+    login = session.exec(select(Login).where(Login.email == email)).first()
+    if not login:
+        raise HTTPException(404, "Usuário não encontrado")
+    
+    # Depois busca o usuário pelo id_login
+    usuario = session.exec(select(Usuario).where(Usuario.id_login == login.id)).first()
+    if not usuario:
+        raise HTTPException(404, "Usuário não encontrado")
+    
+    return usuario
+

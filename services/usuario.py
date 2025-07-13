@@ -9,7 +9,7 @@ def valida_insere_usuario(usu:Usuario, session:SessionDep):
     EMAIL_CADASTRADO = "Email já cadastrado"
     EMAIL_INVALIDO = "Email inválido"
 
-    if usu.nome == "" or usu.cpf == "" or usu.data_nascimento == "":
+    if usu.nome == "" or usu.cpf == "":
         raise HTTPException(400, detail="Dados inválidos")
     
     

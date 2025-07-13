@@ -20,8 +20,3 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 precisou instalar o cmake vindo de cmake.org
-
-pacote da dlib para rodar a biblioteca face_recognition
-```bash
-pip install https://github.com/RvTechiNNovate/dlib/releases/download/19.24.2/dlib-19.24.2-cp311-cp311-win_amd64.whl
-```

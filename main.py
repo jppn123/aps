@@ -3,6 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from connection import create_db_and_tables
 from routers import *
 from routers.face import router as face_router
+from routers.loja import router as loja_router
+from routers.time import router as time_router
+from routers.usuario_time import router as usuario_time_router
 
 
 def lifespan(app:FastAPI):
@@ -20,10 +23,13 @@ app.add_middleware(
 )
 
 
-app.include_router(horas.router)
+# app.include_router(horas.router)
 app.include_router(usuario.router)
 app.include_router(login.router)
 app.include_router(utils.router)
 app.include_router(ponto.router)
 app.include_router(face_router)
+app.include_router(loja_router)
+app.include_router(time_router)
+app.include_router(usuario_time_router)
 

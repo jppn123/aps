@@ -35,7 +35,7 @@ def criar_login(log: CreateLogin, session: SessionDep):
     session.commit()
     session.refresh(login)
     
-    return {"mensagem": "Login criado com sucesso"}
+    return {"mensagem": "Login criado com sucesso", "id":login.id}
 
 
 #sem token

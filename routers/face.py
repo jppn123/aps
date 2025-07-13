@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlmodel import select
 from connection import SessionDep
-from model.face_data import FaceData
+from model.face import Face
 from model.usuario import Usuario
 from model.login import Login
 from services.token import valida_token, cria_token
@@ -153,13 +153,13 @@ def register_face(
             print(f"✅ Embedding extraído com sucesso: {len(embedding)} dimensões")
             
             # Verifica se já existe face cadastrada
-            face_data = session.exec(select(FaceData).where(FaceData.usuario_id == user_id)).first()
+            face_data = session.exec(select(Face).where(Face.usuario_id == user_id)).first()
             if face_data:
                 face_data.imagem = image_bytes
                 face_data.embedding = json.dumps(embedding)
                 print(f"✅ Face atualizada para usuário {usuario.nome}")
             else:
-                face_data = FaceData(
+                face_data = Face(
                     usuario_id=user_id, 
                     imagem=image_bytes,
                     embedding=json.dumps(embedding)
@@ -202,7 +202,7 @@ def login_face(
         print(f"Recebida imagem: {len(image_bytes)} bytes")
         
         # Buscar todos os usuários com face cadastrada
-        faces = session.exec(select(FaceData)).all()
+        faces = session.exec(select(Face)).all()
         print(f"Faces cadastradas encontradas: {len(faces)}")
         
         if not faces:
