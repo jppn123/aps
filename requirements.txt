@@ -1,7 +1,11 @@
-fastapi[standard]
-fastapi-mail
-sqlmodel==0.0.23
-pyodbc
+fastapi
+uvicorn
+sqlmodel
+sqlalchemy
+psycopg2-binary
+python-multipart
+python-jose[cryptography]
+passlib[bcrypt]
 PyJWT
 cryptocode
 python-dotenv
