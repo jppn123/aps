@@ -15,3 +15,5 @@ insightface
 onnxruntime
 Pillow
 numpy
+opencv-python
+scikit-learn
