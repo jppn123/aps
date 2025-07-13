@@ -87,7 +87,6 @@ def get_usuarios_time(
             # Busca o tipo do usuário na tabela de login
             login = session.exec(select(Login).where(Login.id == usuario.id_login)).first()
             tipo_usuario = login.tipo if login else None
-            
             usuarios.append({
                 "id": usuario.id,
                 "nome": usuario.nome,
@@ -96,6 +95,14 @@ def get_usuarios_time(
                 "tipo": tipo_usuario
             })
     
+    def sort_key(u):
+        if u["tipo"] == "admin":
+            return 0
+        elif u["tipo"] == "coord":
+            return 1
+        else:
+            return 2
+    usuarios.sort(key=sort_key)
     return {
         "time": {
             "id": time.id,

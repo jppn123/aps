@@ -1,0 +1,6 @@
+insert into usuario (nome, id_login) values ('administrador', 1)
+insert into usuario (nome, id_login) values ('JOAO PEDRO', 4)
+insert into usuario (nome, id_login) values ('NICOLAS', 5)
+insert into usuario (nome, id_login) values ('OSCAR', 11)
+insert into usuario (nome, id_login) values ('CARL', 13)
+insert into usuario (nome, id_login) values ('JUNIOR', 3)

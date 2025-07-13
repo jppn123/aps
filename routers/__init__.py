@@ -6,3 +6,4 @@ import routers.ponto
 import routers.loja
 import routers.time
 import routers.usuario_time
+from .usuario_loja import *

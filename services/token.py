@@ -6,7 +6,7 @@ import cryptocode
 
 KEY = "secret"
 
-def cria_token(id_usuario = None, params = None, minutos = 10):
+def cria_token(id_usuario = None, params = None, minutos = 60):
     date = datetime.now() + timedelta(minutes=minutos)
     json = {
         "exp": date.strftime("%Y%m%d%H%M%S")

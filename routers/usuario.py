@@ -59,3 +59,13 @@ def retorna_usuario_por_email(email: str, session: SessionDep):
     
     return usuario
 
+@router.get("/getLoginUsuario/{id_usuario}")
+def get_email_usuario(id_usuario: int, session: SessionDep):
+    usuario = session.exec(select(Usuario).where(Usuario.id == id_usuario)).first()
+    if not usuario:
+        raise HTTPException(404, "Usuário não encontrado")
+    login = session.exec(select(Login).where(Login.id == usuario.id_login)).first()
+    if not login:
+        raise HTTPException(404, "Login não encontrado para este usuário")
+    return {"email": login.email, "tipo": login.tipo}
+

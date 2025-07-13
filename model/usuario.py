@@ -17,6 +17,7 @@ class Usuario(SQLModel, table=True):
     login: "Login" = Relationship(back_populates="usuario")
     horas: "Horas" = Relationship(back_populates="usuario")
     usuario_times: List["UsuarioTime"] = Relationship(back_populates="usuario")
+    usuario_lojas: List["UsuarioLoja"] = Relationship(back_populates="usuario")
 
 class CreateUsuario(SQLModel):
     nome: str | None = Field(default=None)
