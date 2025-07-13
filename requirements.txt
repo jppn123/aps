@@ -1,4 +1,6 @@
 fastapi==0.104.1
+fastapi-mail
+pyodbc
 uvicorn[standard]==0.24.0
 sqlmodel==0.0.23
 sqlalchemy==2.0.23
