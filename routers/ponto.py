@@ -3,6 +3,8 @@ from sqlalchemy import desc
 from sqlmodel import select
 from connection import SessionDep
 from model.ponto import Ponto, CreatePonto, UpdatePonto
+from model.loja import Loja
+from services.ponto import valida_registrar_ponto, valida_atualizar_ponto
 from services.token import valida_token
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
@@ -18,6 +20,7 @@ router = APIRouter(
 
 @router.post("/registrar", response_model=Ponto)
 def registrar_ponto(ponto: CreatePonto, session: SessionDep):
+    valida_registrar_ponto(ponto, session)
     ponto_obj = Ponto.model_validate(ponto)
     session.add(ponto_obj)
     session.commit()
@@ -33,31 +36,12 @@ def formatar_data(horario:str):
 
     return f"{dia}/{mes}/{ano}"
 
-@router.get("/getPonto/{id_usuario}")
-def get_ponto_by_day(id_usuario:int,data:str, session:SessionDep):
+@router.get("/getPontos/{id_usuario}")
+def get_ponto_by_day(id_usuario: int, data: str, session: SessionDep):
+    pontos = session.exec(select(Ponto).where(Ponto.id_usuario == id_usuario)).all()
+    pontos_do_dia = [p for p in pontos if formatar_data(p.horario) == data]
+    return pontos_do_dia
 
-    
-    # pontos:Ponto = session.exec(select(Ponto).where(formatar_data(Ponto.horario) == '03/07/2025')).first()
-    pontos:Ponto = session.exec(select(Ponto).where(Ponto.id_usuario == id_usuario).order_by(desc(Ponto.horario))).first()
-    return pontos
-    # if not pontos:
-    #     raise HTTPException(404, "Ponto não encontrado")
-    
-    # if len(pontos) == 2:
-    #     possuiEntrada = False
-    #     possuiSaida = False
-    #     for x in pontos:
-    #         if x.tipo == "entrada":
-    #             possuiEntrada = True
-    #         if x.tipo == "saida":
-    #             possuiSaida = True
-    # else:
-    #     return "Usuário não finalizou a jornada no dia " + data
-    
-    # if possuiEntrada and possuiSaida:
-    #     return pontos
-    # else:
-    #     return "Houve um erro"
 
 @router.get("/getPonto/{id_ponto}", response_model=Ponto)
 def get_ponto(id_ponto: int, session: SessionDep):
@@ -71,11 +55,31 @@ def get_pontos_usuario(id_usuario: int, session: SessionDep):
     pontos = session.exec(select(Ponto).where(Ponto.id_usuario == id_usuario)).all()
     return pontos   
 
+@router.get("/loja/{id_loja}", response_model=list[Ponto])
+def get_pontos_loja(id_loja: int, session: SessionDep):
+    # Verifica se a loja existe
+    loja = session.exec(select(Loja).where(Loja.id == id_loja)).first()
+    if not loja:
+        raise HTTPException(404, "Loja não encontrada")
+    pontos = session.exec(select(Ponto).where(Ponto.id_loja == id_loja)).all()
+    return pontos
+
+@router.get("/loja/{id_loja}/data/{data}")
+def get_pontos_loja_data(id_loja: int, data: str, session: SessionDep):
+    # Verifica se a loja existe
+    loja = session.exec(select(Loja).where(Loja.id == id_loja)).first()
+    if not loja:
+        raise HTTPException(404, "Loja não encontrada")
+    pontos = session.exec(select(Ponto).where(Ponto.id_loja == id_loja)).all()
+    pontos_do_dia = [p for p in pontos if formatar_data(p.horario) == data]
+    return pontos_do_dia
+
 @router.put("/atualizar/{id_ponto}", response_model=Ponto)
 def atualizar_ponto(id_ponto: int, ponto: UpdatePonto, session: SessionDep):
     ponto_obj = session.exec(select(Ponto).where(Ponto.id == id_ponto)).first()
     if not ponto_obj:
         raise HTTPException(404, "Ponto não encontrado")
+    valida_atualizar_ponto(ponto, session)
     ponto_data = ponto.model_dump(exclude_none=True)
     ponto_obj.sqlmodel_update(ponto_data)
     session.add(ponto_obj)

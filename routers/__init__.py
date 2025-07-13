@@ -7,3 +7,5 @@ import routers.loja
 import routers.time
 import routers.usuario_time
 from .usuario_loja import *
+from .usuario_loja_agenda import *
+from .foto_ponto import *

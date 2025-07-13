@@ -7,6 +7,8 @@ from routers.loja import router as loja_router
 from routers.time import router as time_router
 from routers.usuario_time import router as usuario_time_router
 from routers.usuario_loja import router as usuario_loja_router
+from routers.usuario_loja_agenda import router as usuario_loja_agenda_router
+from routers.foto_ponto import router as foto_ponto_router
 
 
 def lifespan(app:FastAPI):
@@ -34,4 +36,6 @@ app.include_router(loja_router)
 app.include_router(time_router)
 app.include_router(usuario_time_router)
 app.include_router(usuario_loja_router)
+app.include_router(usuario_loja_agenda_router)
+app.include_router(foto_ponto_router)
 

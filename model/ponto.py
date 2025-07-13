@@ -1,19 +1,21 @@
-from sqlmodel import SQLModel, Field
-from typing import Optional
+from sqlmodel import SQLModel, Field, Relationship
+from typing import Optional, List
 
 class Ponto(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     id_usuario: int = Field(foreign_key="usuario.id")
-    foto: str
+    id_loja: Optional[int] = Field(default=None, foreign_key="loja.id")
     latitude: float
     longitude: float
     horario: str
     endereco: str
     tipo: str
+    # Relacionamento com fotos
+    fotos: List["FotoPonto"] = Relationship(back_populates="ponto")
 
 class CreatePonto(SQLModel):
     id_usuario: int
-    foto: str
+    id_loja: Optional[int] = None
     latitude: float
     longitude: float
     horario: str
@@ -21,7 +23,7 @@ class CreatePonto(SQLModel):
     tipo: str
 
 class UpdatePonto(SQLModel):
-    foto: str | None = None
+    id_loja: int | None = None
     latitude: float | None = None
     longitude: float | None = None
     horario: str | None = None
