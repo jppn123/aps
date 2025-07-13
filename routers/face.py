@@ -14,6 +14,7 @@ from PIL import Image
 import os
 import traceback
 import cv2
+import gc
 
 router = APIRouter(
     prefix="/face",
@@ -22,28 +23,39 @@ router = APIRouter(
 
 security = HTTPBearer()
 
-# Configurações do InsightFace
-THRESHOLD = 0.5  # Threshold para reconhecimento (0.5 = mais preciso que DeepFace)
+# Configurações do InsightFace - mais leves para Railway
+THRESHOLD = 0.6  # Threshold mais permissivo (0.6 = menos preciso, mas mais rápido)
 
 # Variável global para o modelo InsightFace
 face_analyzer = None
 
 def get_face_analyzer():
-    """Inicializa o modelo InsightFace uma única vez"""
+    """Inicializa o modelo InsightFace sob demanda com configurações leves"""
     global face_analyzer
     if face_analyzer is None:
         try:
             import insightface
             from insightface.app import FaceAnalysis
             
-            # Inicializar o modelo InsightFace
-            face_analyzer = FaceAnalysis(name='buffalo_l')
-            face_analyzer.prepare(ctx_id=0, det_size=(640, 640))
-            print("✅ Modelo InsightFace carregado com sucesso")
+            # Configurações ultra-leves para Railway
+            face_analyzer = FaceAnalysis(name='buffalo_s')  # Modelo menor
+            face_analyzer.prepare(ctx_id=-1, det_size=(160, 160))  # Resolução menor
+            print("✅ Modelo InsightFace carregado com configurações leves")
         except Exception as e:
             print(f"❌ Erro ao carregar InsightFace: {str(e)}")
             return None
     return face_analyzer
+
+def cleanup_memory():
+    """Força limpeza de memória"""
+    gc.collect()
+    if face_analyzer is not None:
+        try:
+            # Limpar cache do modelo
+            if hasattr(face_analyzer, 'clear_cache'):
+                face_analyzer.clear_cache()
+        except:
+            pass
 
 def save_image_from_bytes(image_bytes: bytes, filename: str = "temp.jpg"):
     """Salva bytes da imagem em arquivo temporário"""
@@ -56,7 +68,7 @@ def save_image_from_bytes(image_bytes: bytes, filename: str = "temp.jpg"):
         return None
 
 def get_face_embedding(image_path: str):
-    """Extrai embedding da face usando InsightFace"""
+    """Extrai embedding da face usando InsightFace otimizado"""
     try:
         analyzer = get_face_analyzer()
         if analyzer is None:
@@ -67,6 +79,14 @@ def get_face_embedding(image_path: str):
         if img is None:
             print(f"Erro ao carregar imagem: {image_path}")
             return None
+        
+        # Redimensionar imagem para economizar memória
+        height, width = img.shape[:2]
+        if width > 640 or height > 640:
+            scale = min(640/width, 640/height)
+            new_width = int(width * scale)
+            new_height = int(height * scale)
+            img = cv2.resize(img, (new_width, new_height))
         
         # Converter BGR para RGB
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -91,13 +111,16 @@ def get_face_embedding(image_path: str):
         print(f"Erro ao extrair embedding: {str(e)}")
         print(f"Traceback: {traceback.format_exc()}")
         return None
+    finally:
+        # Limpar memória após processamento
+        cleanup_memory()
 
 def compare_faces(embedding1, embedding2):
-    """Compara dois embeddings usando métrica de cosseno"""
+    """Compara dois embeddings usando métrica de cosseno otimizada"""
     try:
         # Converter para numpy arrays
-        emb1 = np.array(embedding1, dtype=float)
-        emb2 = np.array(embedding2, dtype=float)
+        emb1 = np.array(embedding1, dtype=np.float32)  # float32 em vez de float64
+        emb2 = np.array(embedding2, dtype=np.float32)
         
         print(f"  Dimensões: emb1={emb1.shape}, emb2={emb2.shape}")
         
@@ -113,6 +136,9 @@ def compare_faces(embedding1, embedding2):
         print(f"  Erro ao comparar faces: {str(e)}")
         print(f"  Traceback: {traceback.format_exc()}")
         return False
+    finally:
+        # Limpar memória após comparação
+        cleanup_memory()
 
 @router.post("/register")
 def register_face(
@@ -121,8 +147,13 @@ def register_face(
     file: UploadFile = File(...)
 ):
     try:
-        print(f"=== CADASTRO DE FACE (InsightFace) ===")
+        print(f"=== CADASTRO DE FACE (InsightFace Otimizado) ===")
         print(f"Arquivo recebido: {file.filename}, content_type: {file.content_type}")
+        
+        # Verificar se o modelo está disponível
+        analyzer = get_face_analyzer()
+        if analyzer is None:
+            raise HTTPException(503, "Serviço de reconhecimento facial temporariamente indisponível")
         
         token_data = valida_token(credentials.credentials)
         user_id = token_data.get("id_usu")
@@ -136,6 +167,10 @@ def register_face(
         image_bytes = file.file.read()
         if len(image_bytes) == 0:
             raise HTTPException(400, "Arquivo vazio")
+        
+        # Verificar tamanho da imagem (limitar a 5MB)
+        if len(image_bytes) > 5 * 1024 * 1024:
+            raise HTTPException(400, "Imagem muito grande. Máximo 5MB.")
         
         print(f"Cadastrando face para usuário {usuario.nome}: {len(image_bytes)} bytes")
         
@@ -178,6 +213,8 @@ def register_face(
             # Limpar arquivo temporário
             if os.path.exists(temp_image_path):
                 os.remove(temp_image_path)
+            # Limpar memória
+            cleanup_memory()
                 
     except HTTPException:
         raise
@@ -192,12 +229,21 @@ def login_face(
     file: UploadFile = File(...)
 ):
     try:
-        print(f"=== LOGIN FACIAL (InsightFace) ===")
+        print(f"=== LOGIN FACIAL (InsightFace Otimizado) ===")
         print(f"Arquivo recebido: {file.filename}, content_type: {file.content_type}")
+        
+        # Verificar se o modelo está disponível
+        analyzer = get_face_analyzer()
+        if analyzer is None:
+            raise HTTPException(503, "Serviço de reconhecimento facial temporariamente indisponível")
         
         image_bytes = file.file.read()
         if len(image_bytes) == 0:
             raise HTTPException(400, "Arquivo vazio")
+        
+        # Verificar tamanho da imagem (limitar a 5MB)
+        if len(image_bytes) > 5 * 1024 * 1024:
+            raise HTTPException(400, "Imagem muito grande. Máximo 5MB.")
         
         print(f"Recebida imagem: {len(image_bytes)} bytes")
         
@@ -274,6 +320,8 @@ def login_face(
             # Limpar arquivo temporário
             if os.path.exists(temp_image_path):
                 os.remove(temp_image_path)
+            # Limpar memória
+            cleanup_memory()
                 
     except HTTPException:
         raise
