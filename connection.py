@@ -1,4 +1,6 @@
 from sqlmodel import SQLModel, create_engine, Session
+from fastapi import Depends
+from typing import Annotated
 import os
 
 # Pegar DATABASE_URL do ambiente (Railway fornece isso)
@@ -16,3 +18,5 @@ def create_db_and_tables():
 def get_session():
     with Session(engine) as session:
         yield session
+
+SessionDep = Annotated[Session, Depends(get_session)]

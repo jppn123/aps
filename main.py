@@ -1,6 +1,6 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from connection import create_db_and_tables, get_session
+from connection import create_db_and_tables
 from routers import *
 from routers.face import router as face_router
 from routers.loja import router as loja_router
@@ -9,10 +9,7 @@ from routers.usuario_time import router as usuario_time_router
 from routers.usuario_loja import router as usuario_loja_router
 from routers.usuario_loja_agenda import router as usuario_loja_agenda_router
 from routers.foto_ponto import router as foto_ponto_router
-from sqlmodel import Session
-from typing import Annotated
-
-SessionDep = Annotated[Session, Depends(get_session)]
+import os
 
 def lifespan(app:FastAPI):
     create_db_and_tables()
@@ -39,4 +36,9 @@ app.include_router(usuario_time_router)
 app.include_router(usuario_loja_router)
 app.include_router(usuario_loja_agenda_router)
 app.include_router(foto_ponto_router)
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
 
